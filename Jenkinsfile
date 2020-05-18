@@ -21,6 +21,7 @@ pipeline{
         stage('Start test app') {
             steps {
                 sh label: '', script: '''
+                ls 
                 docker-compose up -d
                 '''
             }
