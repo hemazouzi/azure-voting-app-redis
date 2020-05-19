@@ -53,19 +53,28 @@ pipeline{
          }
       }
 
-      stage ('Push Container'){
+    stage ('Push Container'){
           steps{
               echo "The workspace is $WORKSPACE"
               dir("$WORKSPACE/azure-vote"){
                   script{
-                      docker.withRegistry('https://registry.hub.docker.com/', 'dockerHub'){
+                        docker.withRegistry('', 'dockerHub'){
                           def image = docker.build('hemazouzi/jenkins-he:latest')
                           image.push()
                       }
                   }
               }
           }
-      }
-
+    }
+    
+    stage('Run Trivy') {
+        steps {
+            sleep(time: 30, unit: 'SECONDS')
+                sh label: '', script: '''
+                    trivy hemazouzi/jenkins-he
+                '''
+            }
+        }
+        
      }
 }
