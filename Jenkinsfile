@@ -1,11 +1,13 @@
 pipeline{
     agent any
      stages{
+        
         stage('Verify Branch'){
              steps{
                  echo "$GIT_BRANCH"
              }
         }
+
         stage('Docker Build'){
             steps{
                 sh ' docker images -a'
@@ -18,10 +20,10 @@ pipeline{
                 '''
             }
         }
+
         stage('Start test app') {
             steps {
                 sh label: '', script: '''
-                pwd
                 docker-compose up -d
                 '''
             }
@@ -42,12 +44,27 @@ pipeline{
             '''
          }
       }
+
       stage('Stop test app') {
          steps {
             sh label: '', script: '''
                docker-compose down
             '''
          }
+      }
+
+      stage ('Push Container'){
+          steps{
+              echo "The workspace is $WORKSPACE"
+              dir("$WORKSPACE/azure-vote"){
+                  script{
+                      docker.withRegistry('https://index.docker.io/v1/', 'dockerHub'){
+                          def image = docker.build('hemazouzi/jenkins-he:latest')
+                          image.push()
+                      }
+                  }
+              }
+          }
       }
 
      }
